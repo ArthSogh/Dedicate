@@ -10,8 +10,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "GiftSite — Offrez un site web personnalisé",
-  description: "Créez un site web cadeau unique et personnalisé pour votre proche. Avec ses photos, son prénom, et une page de connexion privée rien que pour elle.",
+  title: "Dedicate — Offrez un site web personnalisé",
+  description: "Créez une expérience numérique inoubliable pour vos proches. Avec ses photos, son prénom, et une page de connexion privée rien que pour elle.",
   keywords: ["cadeau digital", "site web personnalisé", "cadeau original", "saint-valentin", "cadeau couple"],
   openGraph: {
     title: "GiftSite — Offrez un site web personnalisé",
