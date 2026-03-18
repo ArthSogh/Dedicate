@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎁 Dedicate
 
-## Getting Started
+**Dedicate** est une plateforme SaaS moderne permettant de créer, personnaliser et offrir des micro-sites web uniques pour vos proches. Que ce soit pour un anniversaire, une déclaration d'amour ou une occasion spéciale, Dedicate transforme un simple message en une expérience numérique immersive et mémorable.
 
-First, run the development server:
+---
 
+## 🚀 Fonctionnalités Clés
+
+- **Authentification Sécurisée** : Gestion des comptes utilisateurs via Supabase Auth (Email/MDP).
+- **Création Intuitive (Wizard)** : Un tunnel de création étape par étape pour configurer le cadeau (destinataire, message, thème, photos).
+- **Gestion de Contenu Multimédia** : Upload sécurisé d'images via Supabase Storage.
+- **Paiement Intégré** : Tunnel de paiement sécurisé avec Stripe Checkout.
+- **Pages Cadeaux Protégées** : Accès sécurisé par mot de passe pour les destinataires.
+- **Dashboard Utilisateur** : Suivi des cadeaux créés, statut des paiements et gestion des liens de partage.
+- **Design "Wow"** : Interface ultra-moderne utilisant Framer Motion pour des animations fluides et Tailwind CSS pour un rendu premium.
+
+---
+
+## 🛠️ Stack Technique
+
+- **Framework** : [Next.js 14+](https://nextjs.org/) (App Router, Server Components)
+- **Langage** : [TypeScript](https://www.typescriptlang.org/)
+- **Style** : [Tailwind CSS 4](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/)
+- **Animations** : [Framer Motion](https://www.framer.com/motion/)
+- **Backend & Auth** : [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage)
+- **Paiements** : [Stripe](https://stripe.com/)
+- **Gestion d'État** : [Zustand](https://docs.pmnd.rs/zustand/getting-started/introduction)
+
+---
+
+## 📦 Installation et Setup
+
+### 1. Cloner le repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/ArthSogh/Dedicate.git
+cd dedicate
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Installer les dépendances
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Configurer les variables d'environnement
+Créez un fichier `.env.local` à la racine (utilisez `.env.local.example` comme modèle) et remplissez vos clés :
+```env
+NEXT_PUBLIC_SUPABASE_URL=votre_url_supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_cle_anon
+STRIPE_SECRET_KEY=votre_cle_stripe
+STRIPE_WEBHOOK_SECRET=votre_secret_webhook
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Lancer le serveur de développement
+```bash
+npm run dev
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🏠 Structure du Projet
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+src/
+├── app/            # Routes Next.js (Home, Auth, Dashboard, Order, Gift)
+├── components/     # Composants React (Landing, Views, UI shadcn)
+├── lib/            # Configurations (Supabase client/server, Stripe, Utils)
+└── middleware.ts   # Protection des routes et gestion des sessions
+supabase/           # Schémas SQL et scripts de configuration Storage
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 👨‍💻 Développeur
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Arthur Soghoyan**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Projet réalisé dans le cadre d'un apprentissage approfondi de la stack **T3** (Next.js, TypeScript, Tailwind) et de l'écosystème **BaaS** (Supabase/Stripe). L'objectif était de construire un produit complet, de l'architecture backend au design frontend haut de gamme.
+
+---
+
+## 📄 Licence
+Ce projet est sous licence MIT.

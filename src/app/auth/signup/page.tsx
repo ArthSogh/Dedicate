@@ -2,115 +2,54 @@
 
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
+import { LoginView } from "@/components/views/login-view"
 import Link from "next/link"
 
 export default function SignupPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [loading, setLoading] = useState(false)
-
+  const [emailState, setEmailState] = useState("")
   const supabase = createClient()
 
-  async function handleSignup(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
+  const handleSubmit = async (email: string, password: string, isLoginMode: boolean) => {
     setError(null)
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
+    setEmailState(email)
+    
+    if (isLoginMode) {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) setError(error.message)
+      else router.push("/dashboard")
     } else {
-      setSuccess(true)
-      setLoading(false)
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      if (error) setError(error.message)
+      else setSuccess(true)
     }
   }
 
   if (success) {
     return (
-      <div style={{ maxWidth: 400, margin: "80px auto", padding: 20, textAlign: "center" }}>
-        <h1 style={{ fontSize: 24, marginBottom: 8 }}>📧 Vérifie ton email</h1>
-        <p style={{ color: "#666" }}>
-          Un email de confirmation a été envoyé à <strong>{email}</strong>.
-          Clique sur le lien dans l'email pour activer ton compte.
-        </p>
-        <Link href="/auth/login" style={{ display: "inline-block", marginTop: 16, color: "#333", fontWeight: 600 }}>
-          Retour à la connexion
-        </Link>
+      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+        <div className="w-full max-w-md rounded-3xl border border-border bg-card/70 p-8 text-center shadow-xl backdrop-blur-xl">
+          <h1 className="font-serif text-3xl font-semibold mb-4 text-foreground">📧 Vérifiez votre email</h1>
+          <p className="text-muted-foreground mb-8">
+            Un email de confirmation a été envoyé à <strong>{emailState}</strong>.
+            Cliquez sur le lien pour activer votre compte.
+          </p>
+          <Link href="/auth/login" className="inline-block rounded-xl bg-foreground px-6 py-3 text-sm font-medium text-background hover:bg-foreground/90">
+            Retour à la connexion
+          </Link>
+        </div>
       </div>
     )
   }
 
-  return (
-    <div style={{ maxWidth: 400, margin: "80px auto", padding: 20 }}>
-      <h1 style={{ fontSize: 24, marginBottom: 8 }}>Créer un compte</h1>
-      <p style={{ color: "#666", marginBottom: 24 }}>Inscris-toi pour offrir un cadeau digital</p>
-
-      {error && (
-        <div style={{ background: "#fee", border: "1px solid #f88", padding: 12, borderRadius: 8, marginBottom: 16, color: "#c00" }}>
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSignup}>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: "block", marginBottom: 4, fontWeight: 500 }}>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: "100%", padding: 10, border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box" }}
-            placeholder="ton@email.com"
-          />
-        </div>
-
-        <div style={{ marginBottom: 24 }}>
-          <label style={{ display: "block", marginBottom: 4, fontWeight: 500 }}>Mot de passe</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            style={{ width: "100%", padding: 10, border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box" }}
-            placeholder="Minimum 6 caractères"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: 12,
-            background: loading ? "#999" : "#333",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            cursor: loading ? "not-allowed" : "pointer",
-            fontWeight: 600,
-          }}
-        >
-          {loading ? "Création..." : "Créer mon compte"}
-        </button>
-      </form>
-
-      <p style={{ marginTop: 16, textAlign: "center", color: "#666" }}>
-        Déjà un compte ?{" "}
-        <Link href="/auth/login" style={{ color: "#333", fontWeight: 600 }}>
-          Se connecter
-        </Link>
-      </p>
-    </div>
-  )
+  return <LoginView initialMode="signup" onSubmitAction={handleSubmit} errorMessage={error} />
 }

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   const body = await request.text()
-  const sig = headers().get("Stripe-Signature") as string
+  const sig = (await headers()).get("Stripe-Signature") as string
 
   let event
 

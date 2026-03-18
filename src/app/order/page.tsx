@@ -3,42 +3,34 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { WizardView } from "@/components/views/wizard-view"
+import { useAppStore } from "@/lib/store"
 
 export default function OrderPage() {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  const { giftConfig, resetGiftConfig } = useAppStore()
 
-  const [form, setForm] = useState({
-    recipient_name: "",
-    custom_message: "",
-    access_password: "",
-    template_id: "romantic",
-    photos: [] as File[],
-  })
-
-  function updateForm(field: string, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }))
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleFinalize() {
     setLoading(true)
     setError(null)
 
     const uploadedUrls: string[] = []
 
     // 1. Upload photos to Supabase Storage if any
-    if (form.photos.length > 0) {
+    if (giftConfig.images.length > 0) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         setError("Vous devez être connecté pour créer un cadeau.")
         setLoading(false)
+        router.push("/auth/login")
         return
       }
 
-      for (const file of form.photos) {
+      for (const file of giftConfig.images) {
         const fileExt = file.name.split('.').pop()
         const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`
         const filePath = `${user.id}/${fileName}`
@@ -61,15 +53,26 @@ export default function OrderPage() {
       }
     }
 
+    // Map v0's "tone" to our backend's template_id
+    const templateMapping: Record<string, string> = {
+      poetique: "romantic",
+      minimaliste: "minimal",
+      fun: "birthday",
+      luxueux: "minimal"
+    }
+
+    const templateId = giftConfig.tone ? templateMapping[giftConfig.tone as string] || "romantic" : "romantic"
+    const accessPassword = Math.random().toString(36).substring(2, 10)
+
     // 2. Create the gift via API
     const res = await fetch("/api/gifts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        recipient_name: form.recipient_name,
-        custom_message: form.custom_message,
-        access_password: form.access_password,
-        template_id: form.template_id,
+        recipient_name: giftConfig.recipientName || "Inconnu",
+        custom_message: giftConfig.message || "Un message spécial",
+        access_password: accessPassword,
+        template_id: templateId,
         photos: uploadedUrls,
       }),
     })
@@ -82,137 +85,39 @@ export default function OrderPage() {
       return
     }
 
+    resetGiftConfig()
+
     // Redirect to Stripe Checkout or fallback to success page
     if (data.checkoutUrl) {
       window.location.href = data.checkoutUrl
     } else {
-      router.push(`/order/success?slug=${data.gift.slug}&password=${form.access_password}`)
+      router.push(`/order/success?slug=${data.gift.slug}&password=${accessPassword}`)
     }
   }
 
-  return (
-    <div style={{ maxWidth: 500, margin: "40px auto", padding: 20 }}>
-      <h1 style={{ fontSize: 24, marginBottom: 4 }}>🎁 Créer un cadeau</h1>
-      <p style={{ color: "#666", marginBottom: 24 }}>
-        Remplis le formulaire pour générer un site cadeau unique.
-      </p>
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="mx-auto mb-6 h-12 w-12 animate-spin rounded-full border-4 border-coral border-t-transparent" />
+          <p className="font-serif text-2xl font-semibold text-foreground">Préparation de votre écrin...</p>
+        </div>
+      </div>
+    )
+  }
 
+  return (
+    <>
       {error && (
-        <div style={{ background: "#fee", border: "1px solid #f88", padding: 12, borderRadius: 8, marginBottom: 16, color: "#c00" }}>
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md rounded-xl border border-red-200 bg-red-50 p-4 text-center text-sm font-medium text-red-600 shadow-xl">
           {error}
         </div>
       )}
-
-      <form onSubmit={handleSubmit}>
-        {/* Recipient Name */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>
-            Prénom du/de la destinataire *
-          </label>
-          <input
-            type="text"
-            value={form.recipient_name}
-            onChange={(e) => updateForm("recipient_name", e.target.value)}
-            required
-            placeholder="Ex: Marie"
-            style={{ width: "100%", padding: 10, border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box" }}
-          />
-        </div>
-
-        {/* Template */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>
-            Template
-          </label>
-          <select
-            value={form.template_id}
-            onChange={(e) => updateForm("template_id", e.target.value)}
-            style={{ width: "100%", padding: 10, border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box" }}
-          >
-            <option value="romantic">💕 Romantique</option>
-            <option value="birthday">🎂 Anniversaire</option>
-            <option value="minimal">✨ Minimal</option>
-          </select>
-        </div>
-
-        {/* Message */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>
-            Message personnalisé
-          </label>
-          <textarea
-            value={form.custom_message}
-            onChange={(e) => updateForm("custom_message", e.target.value)}
-            rows={4}
-            placeholder="Écris ton message d'amour / d'amitié ici..."
-            style={{ width: "100%", padding: 10, border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box", resize: "vertical" }}
-          />
-        </div>
-
-        {/* Photos (File Upload) */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>
-            Ajouter des photos (optionnel)
-          </label>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={(e) => {
-              if (e.target.files) {
-                const filesArray = Array.from(e.target.files)
-                setForm(prev => ({ ...prev, photos: filesArray }))
-              }
-            }}
-            style={{ width: "100%", padding: 10, border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box" }}
-          />
-          {form.photos.length > 0 && (
-            <p style={{ fontSize: 13, color: "#666", marginTop: 8 }}>
-              {form.photos.length} photo(s) sélectionnée(s).
-            </p>
-          )}
-        </div>
-
-        {/* Access Password */}
-        <div style={{ marginBottom: 24 }}>
-          <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>
-            Mot de passe d'accès pour le/la destinataire *
-          </label>
-          <input
-            type="text"
-            value={form.access_password}
-            onChange={(e) => updateForm("access_password", e.target.value)}
-            required
-            placeholder="Ex: jetaime2024"
-            style={{ width: "100%", padding: 10, border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box" }}
-          />
-          <p style={{ fontSize: 12, color: "#999", marginTop: 4 }}>
-            Ce mot de passe sera nécessaire pour accéder au site cadeau.
-          </p>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: 14,
-            background: loading ? "#999" : "#333",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            cursor: loading ? "not-allowed" : "pointer",
-            fontWeight: 600,
-            fontSize: 16,
-          }}
-        >
-          {loading ? "Création en cours..." : "Créer le cadeau 🎁"}
-        </button>
-      </form>
-
-      <p style={{ marginTop: 16, textAlign: "center" }}>
-        <a href="/dashboard" style={{ color: "#666" }}>← Retour au dashboard</a>
-      </p>
-    </div>
+      <WizardView 
+        onBack={() => router.push("/dashboard")} 
+        onFinalize={handleFinalize} 
+      />
+    </>
   )
 }
+
