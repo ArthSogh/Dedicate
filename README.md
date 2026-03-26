@@ -79,5 +79,17 @@ Projet réalisé dans le cadre d'un apprentissage approfondi de la stack **T3** 
 
 ---
 
+## 🎯 Défis Techniques & Apprentissages (Note pour les Recruteurs)
+
+Ce projet a été conçu pour démontrer ma capacité à mener de bout en bout le développement d'un produit complexe (Full-stack SaaS) avec des exigences techniques de niveau production :
+
+1. **Intégration Paiement & Webhooks Stripe** : Sécurisation du tunnel de vente et gestion de l'asynchronisme des paiements via les événements webhook Stripe pour valider la création du site-cadeau et initier l'envoi d'emails transactionnels.
+2. **Architecture App Router (Next.js 14+)** : Déploiement optimal de Server Components pour réduire le JS côté client, interagir directement avec Supabase avec des temps de réponse ultra-rapides, tout en conservant une interactivité riche (Client Components) pour le *Wizard* de création.
+3. **Sécurité Automatisée (Supabase RLS & Storage)** : Mise en place de règles de sécurité "Row Level Security" strictes sur PostgreSQL. Les utilisateurs ne peuvent modifier que leurs propres configurations, et les photos téléchargées sont validées rigoureusement avant l'upload.
+4. **UX/UI Sophistiquée (Framer Motion)** : Refonte complète de la présentation frontend. Ce projet met en valeur la capacité à traduire des maquettes (v0) en composants fonctionnels avec des animations web fluides de haute qualité.
+5. **Gestion d'État Complexe (Zustand)** : Résolution de la dégradation de performance lors d'un tunnel de commande (wizard) à 10 étapes en utilisant Zustand plutôt que du prop-drilling.
+
+---
+
 ## 📄 Licence
 Ce projet est sous licence MIT.
