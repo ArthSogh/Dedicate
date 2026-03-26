@@ -79,7 +79,7 @@ Projet réalisé dans le cadre d'un apprentissage approfondi de la stack **T3** 
 
 ---
 
-## 🎯 Défis Techniques & Apprentissages (Note pour les Recruteurs)
+## 🎯 Défis Techniques & Apprentissages
 
 Ce projet a été conçu pour démontrer ma capacité à mener de bout en bout le développement d'un produit complexe (Full-stack SaaS) avec des exigences techniques de niveau production :
 
